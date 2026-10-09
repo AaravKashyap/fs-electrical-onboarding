@@ -14,7 +14,14 @@ public:
         Start of public variables
     */
 
+    float torque_demand = 0;
+    bool apps_implausibility = false;
+    bool out_of_range_implausibility = false;
 
+    float apps1_voltage = 0;
+    float apps2_voltage = 0;
+    float apps1_position = 0;
+    float apps2_position = 0;
 
     /*
         End of public variables
@@ -32,7 +39,13 @@ private:
         Start of private variables
     */
 
-    
+    AnalogIn apps1;
+    AnalogIn apps2;
+
+    Timer apps_implausibility_timer;
+    Timer out_of_range_timer;
+    bool apps_implausibility_timer = false;
+    bool out_of_range_timer = false;
 
     /*
         End of private variables
