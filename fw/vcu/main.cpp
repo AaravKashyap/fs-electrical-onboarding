@@ -2,9 +2,13 @@
 #include "mbed.h"
 #include <cstdio>
 
-ETCController etc{/* INSERT PIN NAMES FOR APPS 1 & 2 */};
+ETCController etc{PC_1, PC_2};
 
 CAN can{PB_8, PB_9, 500000};
+
+// Message IDs from CANbus.dbc
+static constexpr uint16_t VCU_TPDO_STATUS_ID = 403;
+static constexpr uint16_t SME_RPDO_THROTTLE_DEMAND_ID = 390;
 
 // Predefined for use in main()
 void send_etc_CAN_messages();
@@ -17,6 +21,8 @@ int main() {
         Make send_CAN messages loop consistently
         at 20hz (20 messages / second)
     */
+
+    EventQueue queue;
 
 
 

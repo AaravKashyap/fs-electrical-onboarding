@@ -5,9 +5,7 @@
 #include "etc_controller.h"
 
 // Assign appropriate GPIO objects depending on pin parameters
-ETCController::ETCController(PinName APPS1_pin, PinName APPS2_pin) {
-    apps1 = AnalogIn(APPS1_pin);
-    apps2 = AnalogIn(APPS2_pin);
+ETCController::ETCController(PinName APPS1_pin, PinName APPS2_pin): apps1(APPS1_pin), apps2(APPS2_pin) {
 }
 
 /* 
