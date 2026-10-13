@@ -106,5 +106,31 @@ void ETCController::update_implausibilities() {
         for too long.
     */
 
-    
+    if (apps_mismatch) {
+        if (!apps_implausibility_timer) {
+            apps_implausibility_timer.reset();
+            apps_implausibility_timer.start();
+            apps_implausibility_timing = true;
+        }
+    }   else {
+            apps_implausibility_timer.stop();
+            apps_implausibility_timer.reset();
+            apps_implausibility_timing = false;
+    }
+
+    if (out_of_range) {
+        if (!out_of_range_timing) {
+            out_of_range_timer.reset();
+            out_of_range_timer.start();
+            out_of_range_timing = true;
+        }
+    } else {
+        out_of_range_timer.stop();
+        out_of_range_timer.reset();
+        out_of_range_timing = false;
+    }
+
+    apps_implausibility = apps_implausibility_timing && apps_implausibility_timer.elapsed_time() > std::chrono::milliseconds(100);
+    out_of_range_implausibility = out_of_range_timing && out_of_range_timer.elapsed_time() > std::chrono::milliseconds(100);
+
 }

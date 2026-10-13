@@ -44,8 +44,8 @@ private:
 
     Timer apps_implausibility_timer;
     Timer out_of_range_timer;
-    bool apps_implausibility_timer = false;
-    bool out_of_range_timer = false;
+    bool apps_implausibility_timing = false;
+    bool out_of_range_timing = false;
 
     /*
         End of private variables
