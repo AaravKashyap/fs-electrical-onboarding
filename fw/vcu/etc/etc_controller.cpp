@@ -62,8 +62,8 @@ void ETCController::update_state() {
     apps2_voltage = apps2.read() * 3.3;
 
     //It's to basically show if the position of the pedal is 0 or 1. It's the voltage value divided by the range of the voltage to give it into the clamp function and check if its closer to 0 (false) or 1 (true).
-    apps1_position = clamp((apps1_voltage - APPS1_MIN_VOLTAGE) / (APPS1_MAX_VOLTAGE - APPS1_MIN_VOLTAGE));
-    apps2_position = clamp((apps2_voltage - APPS2_MIN_VOLTAGE) / (APPS2_MAX_VOLTAGE - APPS2_MIN_VOLTAGE));
+    apps1_position = clamp((((apps1_voltage - APPS1_MIN_VOLTAGE) / (APPS1_MAX_VOLTAGE - APPS1_MIN_VOLTAGE)) - PEDAL_DEADZONE_PERCENTAGE) / (1.0 - (2 * PEDAL_DEADZONE_PERCENTAGE)));
+    apps2_position = clamp((((apps2_voltage - APPS2_MIN_VOLTAGE) / (APPS2_MAX_VOLTAGE - APPS2_MIN_VOLTAGE)) - PEDAL_DEADZONE_PERCENTAGE) / (1.0 - (2 * PEDAL_DEADZONE_PERCENTAGE)));
 
     // Here to simplify this function and readability.
     update_implausibilities();
@@ -105,30 +105,25 @@ void ETCController::update_implausibilities() {
     */
 
     if (apps_mismatch) {
-        if (!apps_implausibility_timer) {
-            apps_implausibility_timer.reset();
-            apps_implausibility_timer.start();
-            apps_implausibility_timing = true;
-        }
-    }   else {
-            apps_implausibility_timer.stop();
-            apps_implausibility_timer.reset();
-            apps_implausibility_timing = false;
+        apps_implausibility_timer.start();
+    }
+    else {
+        apps_implausibility_timer.stop();
+        apps_implausibility_timer.reset();
     }
 
     if (out_of_range) {
-        if (!out_of_range_timing) {
-            out_of_range_timer.reset();
             out_of_range_timer.start();
-            out_of_range_timing = true;
         }
-    } else {
+    else {
         out_of_range_timer.stop();
         out_of_range_timer.reset();
-        out_of_range_timing = false;
     }
 
-    apps_implausibility = apps_implausibility_timing && apps_implausibility_timer.elapsed_time() > std::chrono::milliseconds(100);
-    out_of_range_implausibility = out_of_range_timing && out_of_range_timer.elapsed_time() > std::chrono::milliseconds(100);
-
+    if (chrono::duration_cast<chrono::milliseconds>(apps_implausibility_timer.elapsed_time()) > std::chrono::milliseconds(100)) {
+        apps_implausibility = true;
+    }
+    if (chrono::duration_cast<chrono::milliseconds>(out_of_range_timer.elapsed_time()) > std::chrono::milliseconds(100)) {
+        out_of_range_implausibility = true;
+    }
 }

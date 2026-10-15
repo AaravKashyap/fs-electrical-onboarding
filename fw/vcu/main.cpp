@@ -15,7 +15,7 @@ void send_etc_CAN_messages();
 void send_sme_CAN_messages();
 
 int main() {
-    printf("Hello World!!\n");
+    printf("Hello World!\n");
 
     /*
         Make send_CAN messages loop consistently
@@ -24,9 +24,10 @@ int main() {
 
     EventQueue queue;
     Thread can_thread;
-    can_thread.start(callback(&queue, &EventQueue::dispatch_forever));
     queue.call_every(50ms, send_etc_CAN_messages);
     queue.call_every(50ms, send_sme_CAN_messages);
+    can_thread.start(callback(&queue, &EventQueue::dispatch_forever));
+
 
 
     // No need to edit this while loop
@@ -45,18 +46,12 @@ int main() {
     & VCU_ETC_IMPLAUS_APPS_DEVIATION properly added.
 */
 void send_etc_CAN_messages() {
-    uint16_t data[8] = {0};
+    uint8_t data[8] = {0};
 
-    data[0] |= (1 << 0); // VCU_ETC_READY_TO_DRIVE
-    data[0] |= (1 << 1); // VCU_ETC_MOTOR_ENABLED
-
-    if (etc.out_of_range_implausibility) {
-        data[0] |= (1 << 4); // VCU_ETC_IMPLAUS_APPS_DEVIATION
-    }
-
-    if (etc.apps_implausibility) {
-        data[0] |= (1 << 6); // VCU_ETC_IMPLAUS_APPS_OUT_OF_RANGE
-    }
+    data[0] = ((!etc.apps_implausibility && !etc.out_of_range_implausibility) << 0)
+            | ((!etc.apps_implausibility && !etc.out_of_range_implausibility) << 1)
+            | (etc.out_of_range_implausibility << 4)
+            | (etc.apps_implausibility << 6);
 
     CANMessage msg(VCU_TPDO_STATUS_ID, data, 8);
     can.write(msg);
@@ -68,12 +63,10 @@ void send_etc_CAN_messages() {
     torque demand determined by the ETC.
 */
 void send_sme_CAN_messages() {
-    uint16_t data[8] = {0};
+    uint8_t data[8] = {0};
 
-    uint16_t torque_demand = static_cast<uint16_t>(etc.torque_demand);
-
-    data[0] |= (torque_demand & 0xFF); // SME_THROTL_TorqueDemand
-    data[1] |= ((torque_demand >> 8) & 0xFF); // SME_THROTL_TorqueDemand
+    data[0] = (etc.torque_demand & 0xFF);
+    data[1] = ((etc.torque_demand >> 8) & 0xFF);
 
     CANMessage msg(SME_RPDO_THROTTLE_DEMAND_ID, data, 8);
     can.write(msg);

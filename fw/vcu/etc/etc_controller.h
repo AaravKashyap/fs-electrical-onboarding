@@ -14,7 +14,7 @@ public:
         Start of public variables
     */
 
-    float torque_demand = 0;
+    int16_t torque_demand = 0;
     bool apps_implausibility = false;
     bool out_of_range_implausibility = false;
 
